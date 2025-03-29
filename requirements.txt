@@ -1,0 +1,6 @@
+streamlit
+bokeh
+streamlit-bokeh
+sqlalchemy
+pymysql
+cryptography
