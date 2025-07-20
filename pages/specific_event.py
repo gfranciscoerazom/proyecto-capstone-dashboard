@@ -191,71 +191,72 @@ if selected_event:
         #     •	Also, the organizer will have the option to change the default values so that the system adapts to their needs.
         ############################################################################
 
-        show_calculator = st.toggle("Mostrar calculadora de personal")
+        if False:
+            show_calculator = st.toggle("Mostrar calculadora de personal")
 
-        if show_calculator:
-            st.subheader("Calculadora de personal")
+            if show_calculator:
+                st.subheader("Calculadora de personal")
 
-            calculator_numerators, calculator_denominators = st.columns(2)
+                calculator_numerators, calculator_denominators = st.columns(2)
 
-            with calculator_numerators:
-                numerator_staff_by_registration = st.number_input(
-                    "Número de staff por registro para manejo de la asistencia",
-                    min_value=1,
-                    value=1,
+                with calculator_numerators:
+                    numerator_staff_by_registration = st.number_input(
+                        "Número de staff por registro para manejo de la asistencia",
+                        min_value=1,
+                        value=1,
+                        step=1
+                    )
+                    numerator_staff_by_activities = st.number_input(
+                        "Número de staff por registro para el manejo de las actividades",
+                        min_value=1,
+                        value=1,
+                        step=1
+                    )
+
+                with calculator_denominators:
+                    denominator_staff_by_registration = st.number_input(
+                        "Número de registros por staff para manejo de la asistencia",
+                        min_value=1,
+                        value=100,
+                        step=1
+                    )
+                    denominator_staff_by_activities = st.number_input(
+                        "Número de registros por staff para manejo de las actividades",
+                        min_value=1,
+                        value=40,
+                        step=1
+                    )
+
+                staff_for_unforeseen = st.number_input(
+                    "Número de staff para imprevistos",
+                    min_value=0,
+                    value=10,
                     step=1
                 )
-                numerator_staff_by_activities = st.number_input(
-                    "Número de staff por registro para el manejo de las actividades",
-                    min_value=1,
-                    value=1,
+
+                additional_staff = st.number_input(
+                    "Número de staff adicional",
+                    min_value=0,
+                    value=0,
                     step=1
                 )
 
-            with calculator_denominators:
-                denominator_staff_by_registration = st.number_input(
-                    "Número de registros por staff para manejo de la asistencia",
+                expected_registrations = st.number_input(
+                    "Número de gente registrada",
                     min_value=1,
-                    value=100,
-                    step=1
-                )
-                denominator_staff_by_activities = st.number_input(
-                    "Número de registros por staff para manejo de las actividades",
-                    min_value=1,
-                    value=40,
+                    value=total_people_registered,
                     step=1
                 )
 
-            staff_for_unforeseen = st.number_input(
-                "Número de staff para imprevistos",
-                min_value=0,
-                value=10,
-                step=1
-            )
+                staff_needed = (
+                    ceil((expected_registrations / denominator_staff_by_registration) * numerator_staff_by_registration) + staff_for_unforeseen +
+                    ceil((expected_registrations / denominator_staff_by_activities) *
+                         numerator_staff_by_activities) + additional_staff
+                )
 
-            additional_staff = st.number_input(
-                "Número de staff adicional",
-                min_value=0,
-                value=0,
-                step=1
-            )
-
-            expected_registrations = st.number_input(
-                "Número de gente registrada",
-                min_value=1,
-                value=total_people_registered,
-                step=1
-            )
-
-            staff_needed = (
-                ceil((expected_registrations / denominator_staff_by_registration) * numerator_staff_by_registration) + staff_for_unforeseen +
-                ceil((expected_registrations / denominator_staff_by_activities) *
-                     numerator_staff_by_activities) + additional_staff
-            )
-
-            st.badge(
-                f"El número total de staff recomendado para el evento es de **{staff_needed:.0f}** personas"
-            )
+                st.badge(
+                    f"El número total de staff recomendado para el evento es de **{staff_needed:.0f}** personas"
+                )
 
         # endregion
         # region Show data
