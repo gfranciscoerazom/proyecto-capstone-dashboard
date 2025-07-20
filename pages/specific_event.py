@@ -73,6 +73,7 @@ Tabla: user
   Sin relaciones (Foreign Keys) (ENUM)
 """
 from math import pi, ceil
+import sqlalchemy
 import streamlit as st
 from bokeh.plotting import figure
 from bokeh.models import FactorRange, ColumnDataSource, Whisker
@@ -353,9 +354,14 @@ if selected_event:
                 border=True,
             )
 
-            st.badge(
-                f"Por lo tanto, el porcentaje de asistencia es del **{total_people_who_attended / total_people_registered * 100:.2f}%**"
-            )
+            try:
+                st.badge(
+                    f"Por lo tanto, el porcentaje de asistencia es del **{total_people_who_attended / total_people_registered * 100:.2f}%**"
+                )
+            except ZeroDivisionError:
+                st.badge(
+                    "Aún no hay gente inscrita en el evento."
+                )
 
         st.divider()
         # endregion
@@ -548,25 +554,46 @@ if selected_event:
             3)
 
         with gender_statistics_col1:
-            st.metric(
-                label="Cantidad de hombres",
-                value=f"{gender_counts[0]} ({(gender_counts[0] / sum(gender_counts) * 100):.2f}%)",
-                border=True,
-            )
+            try:
+                st.metric(
+                    label="Cantidad de hombres",
+                    value=f"{gender_counts[0]} ({(gender_counts[0] / sum(gender_counts) * 100):.2f}%)",
+                    border=True,
+                )
+            except ZeroDivisionError:
+                st.metric(
+                    label="Cantidad de hombres",
+                    value="0 (0.00%)",
+                    border=True,
+                )
 
         with gender_statistics_col2:
-            st.metric(
-                label="Cantidad de mujeres",
-                value=f"{gender_counts[1]} ({(gender_counts[1] / sum(gender_counts) * 100):.2f}%)",
-                border=True,
-            )
+            try:
+                st.metric(
+                    label="Cantidad de mujeres",
+                    value=f"{gender_counts[1]} ({(gender_counts[1] / sum(gender_counts) * 100):.2f}%)",
+                    border=True,
+                )
+            except ZeroDivisionError:
+                st.metric(
+                    label="Cantidad de mujeres",
+                    value="0 (0.00%)",
+                    border=True,
+                )
 
         with gender_statistics_col3:
-            st.metric(
-                label="Cantidad de otros",
-                value=f"{gender_counts[2]} ({(gender_counts[2] / sum(gender_counts) * 100):.2f}%)",
-                border=True,
-            )
+            try:
+                st.metric(
+                    label="Cantidad de otros",
+                    value=f"{gender_counts[2]} ({(gender_counts[2] / sum(gender_counts) * 100):.2f}%)",
+                    border=True,
+                )
+            except ZeroDivisionError:
+                st.metric(
+                    label="Cantidad de otros",
+                    value="0 (0.00%)",
+                    border=True,
+                )
 
         st.divider()
         # endregion
@@ -578,12 +605,19 @@ if selected_event:
         #     •	How many people registered for previous events?
         ############################################################################
         id_all_assistants = people_registered["companion_id"]
-        registrations_for_other_events = conn.query(
-            f"""SELECT * FROM registration WHERE companion_id IN ({','.join(map(str, id_all_assistants))}) AND event_id != '{event_id}'"""
-        )
-        count_people_registered_previous_events = len(
-            registrations_for_other_events["companion_id"].unique()
-        )
+        try:
+            registrations_for_other_events = conn.query(
+                f"""SELECT * FROM registration WHERE companion_id IN ({','.join(map(str, id_all_assistants))}) AND event_id != '{event_id}'"""
+            )
+        except sqlalchemy.exc.ProgrammingError:
+            registrations_for_other_events = pd.DataFrame()
+
+        try:
+            count_people_registered_previous_events = len(
+                registrations_for_other_events["companion_id"].unique()
+            )
+        except KeyError:
+            count_people_registered_previous_events = 0
 
         st.metric(
             label="Cantidad de personas registradas en eventos anteriores",
@@ -613,8 +647,12 @@ if selected_event:
         )
 
         # Bar chart to show the attendance hour of the assistants
-        attendance_hour_counts = people_registered["arrival_time"].dt.components.hours.value_counts(
-        )
+        try:
+            attendance_hour_counts = people_registered["arrival_time"].dt.components.hours.value_counts(
+            )
+        except AttributeError:
+            attendance_hour_counts = pd.Series(dtype=int)
+
         attendance_hour_counts = attendance_hour_counts[
             attendance_hour_counts.index >= hour_range[0]]
         attendance_hour_counts = attendance_hour_counts[
@@ -656,18 +694,33 @@ if selected_event:
             streamlit_bokeh(hour_bar_chart)
 
         with hour_statistics_col2:
-            st.metric(
-                label="Hora promedio de asistencia",
-                value=people_registered["arrival_time"].dt.components.hours.mean(
-                ),
-                border=True,
-            )
-            st.metric(
-                label="Hora más concurrida de asistencia",
-                value=people_registered["arrival_time"].dt.components.hours.mode()[
-                    0],
-                border=True,
-            )
+            try:
+                st.metric(
+                    label="Hora promedio de asistencia",
+                    value=people_registered["arrival_time"].dt.components.hours.mean(
+                    ),
+                    border=True,
+                )
+            except AttributeError:
+                st.metric(
+                    label="Hora promedio de asistencia",
+                    value="No disponible",
+                    border=True,
+                )
+
+            try:
+                st.metric(
+                    label="Hora más concurrida de asistencia",
+                    value=people_registered["arrival_time"].dt.components.hours.mode()[
+                        0],
+                    border=True,
+                )
+            except AttributeError:
+                st.metric(
+                    label="Hora más concurrida de asistencia",
+                    value="No disponible",
+                    border=True,
+                )
 
         st.divider()
         # endregion
