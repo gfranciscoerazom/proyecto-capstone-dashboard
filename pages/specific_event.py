@@ -97,6 +97,10 @@ st.title("Estadísticas de eventos específicos")
 
 st.sidebar.title("Estadísticas de eventos específicos 📈")
 
+if st.button("Recargar datos"):
+    st.cache_data.clear()
+    # st.rerun()
+
 conn = st.connection("sql")
 
 events = conn.query("SELECT * FROM event")
