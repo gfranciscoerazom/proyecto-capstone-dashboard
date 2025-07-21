@@ -97,7 +97,7 @@ st.title("Estadísticas de eventos específicos")
 
 st.sidebar.title("Estadísticas de eventos específicos 📈")
 
-if st.button("Recargar datos"):
+if st.sidebar.button("Recargar datos"):
     st.cache_data.clear()
     # st.rerun()
 
