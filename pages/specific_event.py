@@ -511,7 +511,7 @@ if selected_event:
         st.subheader("Género de los asistentes")
 
         # Bar chart to visualize the number of attendees by gender
-        gender_counts = people_registered['gender'].value_counts()
+        gender_counts = people_who_attended['gender'].value_counts()
         gender_counts = (
             gender_counts.get("MALE", 0),
             gender_counts.get("FEMALE", 0),
@@ -605,27 +605,27 @@ if selected_event:
         # This section answers the following questions:
         #     •	How many people registered for previous events?
         ############################################################################
-        id_all_assistants = people_registered["companion_id"]
-        try:
-            registrations_for_other_events = conn.query(
-                f"""SELECT * FROM registration WHERE companion_id IN ({','.join(map(str, id_all_assistants))}) AND event_id != '{event_id}'"""
-            )
-        except sqlalchemy.exc.ProgrammingError:
-            registrations_for_other_events = pd.DataFrame()
+        # id_all_assistants = people_registered["companion_id"]
+        # try:
+        #     registrations_for_other_events = conn.query(
+        #         f"""SELECT * FROM registration WHERE companion_id IN ({','.join(map(str, id_all_assistants))}) AND event_id != '{event_id}'"""
+        #     )
+        # except sqlalchemy.exc.ProgrammingError:
+        #     registrations_for_other_events = pd.DataFrame()
 
-        try:
-            count_people_registered_previous_events = len(
-                registrations_for_other_events["companion_id"].unique()
-            )
-        except KeyError:
-            count_people_registered_previous_events = 0
+        # try:
+        #     count_people_registered_previous_events = len(
+        #         registrations_for_other_events["companion_id"].unique()
+        #     )
+        # except KeyError:
+        #     count_people_registered_previous_events = 0
 
-        st.metric(
-            label="Cantidad de personas registradas en eventos anteriores",
-            value=count_people_registered_previous_events,
-            border=True,
-        )
-        st.divider()
+        # st.metric(
+        #     label="Cantidad de personas registradas en eventos anteriores",
+        #     value=count_people_registered_previous_events,
+        #     border=True,
+        # )
+        # st.divider()
         # endregion
         # region Assistance hour
         ############################################################################
